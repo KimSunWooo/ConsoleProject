@@ -101,6 +101,7 @@ void MainMenu::PlayGame()
 	//게임 시작.
 	InGameManager ig;
 	ig.InGameDisplay();
+	ig.RunningGame();
 }
 
 int MainMenu::Quit()

@@ -13,6 +13,8 @@ public :
 	const vector<string>& Getmap() const;
 
 	void InGameDisplay();
+	void RunningGame();
+	void DrawMap();
 
 private : 
 	
