@@ -4,7 +4,7 @@
 
 
 int main() {
-	
+	srand(std::time(nullptr));
 	
 	Game* g = new Game();
 	g->Start();

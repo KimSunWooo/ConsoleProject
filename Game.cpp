@@ -13,6 +13,5 @@ Game::~Game()
 
 void Game::Start()
 {
-	cout << "게임이 시작되었습니다." << endl;
 	MainMenu();
 }
