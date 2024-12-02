@@ -1,6 +1,7 @@
 #pragma once
 #include<vector>
 #include<iostream>
+#include"Block.h"
 using namespace std;
 class InGameManager
 {
@@ -16,6 +17,8 @@ public :
 	void RunningGame();
 	void DrawMap();
 
+	void UpdateColumns(vector<vector<Block>>& columns, const std::vector<Block>& blocks);
+	int CalculateScore(vector<vector<Block>>& columns);
 private : 
 	
 };

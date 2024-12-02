@@ -16,6 +16,17 @@ Block::~Block()
 {
 }
 
+void Block::GenerateBlockLine(std::vector<Block>& blocks, vector<Block> height, ColorSelector selector, int blockWidth, int gap, int startY, int i)
+{
+    Block b;
+    int startX = 35 + i * (blockWidth + gap); // X 위치 계산
+    b.GenerateBlock(startX, startY);
+    Color color = selector.GetColor(1);      // 난수 기반 색상 선택
+    b.SetColor(color);
+    height.push_back(b);
+    blocks.push_back(b); // 블록 추가
+}
+
 bool Block::operator==(const Block& other) const {
     return x == other.x && y == other.y && color == other.color;
 }

@@ -16,7 +16,9 @@ protected:
 public:
     Block();
     ~Block();
-
+    // 한줄 초기화
+    static void GenerateBlockLine(std::vector<Block>& blocks, vector<Block> height, ColorSelector selector, int blockWidth, int gap, int startY, int i);
+    
     // 블록 생성
     void GenerateBlock(int x, int y);
 
