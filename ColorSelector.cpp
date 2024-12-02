@@ -2,11 +2,12 @@
 
 Color ColorSelector::GetColor(int level) {
     // 선택 가능한 색상 배열
+    int randomValue = rand() % 2;
     static std::vector<Color> colorLevels = {
         Color::Red, Color::Blue,    // Level 1
         Color::Yellow,             // Level 2
         Color::Green,              // Level 3
-        Color::purple,             // Level 4
+        Color::Purple,             // Level 4
         Color::Gal, Color::White   // Level 5
     };
 

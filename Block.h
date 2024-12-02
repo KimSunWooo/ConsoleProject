@@ -2,31 +2,43 @@
 #include<iostream>
 #include<vector>
 #include"color.h"
+#include "ColorSelector.h"
 using namespace std;
-class Block
-{
-protected :
-	string color;
-	int startX = 19;
-	int startY = 6;
-	vector<vector<int>> blockShape = { {1,1,1,1}, {1,1,1,1} };
-public :
-	Block();
-	~Block();
-	// 블록 생성
-	void GenerateBlock(int x, int y);
-	// 블록 라인생성
-	// 추가 색 선택
-	vector<string> GetAddColor();
-	// 색 추가
-	void SetColor(Color newColor);
-	vector<vector<string>> BlockShape();
-	// 블록 제거(파괴)
-	int DestroyBlock(int level, std::string color);
-	// 블록 하단진행
-	void BlockDown();
-	vector<string> DrawBlock(int level);
-	vector<string> DrawBlock(Color color);
-	
+
+class Block {
+protected:
+    Color color;
+    int x; // X 좌표
+    int y; // Y 좌표 (통합 변수)
+    int startX;
+    vector<vector<int>> blockShape = { {1, 1, 1, 1}, {1, 1, 1, 1} }; // 블럭 모양
+
+public:
+    Block();
+    ~Block();
+
+    // 블록 생성
+    void GenerateBlock(int x, int y);
+
+    // 색 설정
+    void SetColor(Color newColor);
+
+    // 블록 제거(파괴)
+    int DestroyBlock(int level, std::string color);
+
+    // 블록 하단 이동
+    void BlockDown(int startY, ColorSelector& selector);
+    void MoveBlocks(std::vector<Block>& blocks, int startY, ColorSelector& selector);
+    // Getters
+    int GetX() const;
+    int GetY() const;
+    Color GetColor() const;
+
+    // == 연산자 오버로딩
+    bool operator==(const Block& other) const;
+
+    // 블록 출력
+    vector<string> DrawBlock(int level);
+   
 };
 

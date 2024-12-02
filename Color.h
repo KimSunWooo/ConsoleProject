@@ -6,7 +6,7 @@ enum class Color
 	Blue,
 	Yellow,
 	Green,
-	purple,
+	Purple,
 	Gal,
 	White
 };
