@@ -127,43 +127,37 @@ void InGameManager::RunningGame() {
         auto currentTime = chrono::steady_clock::now();
         int elapsedTime = chrono::duration_cast<chrono::milliseconds>(currentTime - lastMoveTime).count();
 
-        // 1. 사용자 입력 처리
-        int key = inputKey.exchange(-1, memory_order_relaxed); // 입력 값을 읽고 초기화
+        // 사용자 입력 처리
+        int key = inputKey.exchange(-1, memory_order_relaxed);
         if (key == DOWN) {
-            std::cout << "DOWN key pressed" << std::endl;
             for (auto& block : blocks) {
-                block.BlockDown(startY, selector); // 블록을 아래로 이동
+                block.BlockDown(startY, selector);
             }
+            UpdateColumns(columns, blocks);
         }
 
-        // 2. 자동 이동 처리
+        // 자동 이동 처리
         if (elapsedTime >= autoMoveInterval) {
-            
             for (auto& block : blocks) {
-                block.BlockDown(startY, selector); // 기존 블록 이동
+                block.BlockDown(startY, selector);
             }
-
-            // 새로운 블록 추가
             for (int i = 0; i < 3; ++i) {
                 Block::GenerateBlockLine(blocks, columns[i], selector, blockWidth, gap, startY, i);
             }
-
-            lastMoveTime = currentTime; // 마지막 이동 시간 갱신
+            UpdateColumns(columns, blocks);
+            lastMoveTime = currentTime;
         }
 
-        // 3. 세로줄 업데이트
-        UpdateColumns(columns, blocks);
-
-        // 4. 점수 계산 및 블록 제거
+        // 점수 계산 및 블록 제거
         score += CalculateScore(columns);
-        cout << score << endl;
+        Block::RemoveMatchingBlocks(columns, blocks);
 
-        // 3. 블록 출력
+        // 블록 다시 출력
         for (auto& block : blocks) {
-            block.DrawBlock(1); // 블록 출력
+            block.DrawBlock(1);
         }
 
-        // 4. 대기 시간 (루프 속도 조절)
+        // 루프 속도 조절
         this_thread::sleep_for(chrono::milliseconds(50));
     }
         stopInputThread = true;
@@ -193,45 +187,34 @@ void InGameManager::DrawMap() {
 
 void InGameManager::UpdateColumns(vector<vector<Block>>& columns, const std::vector<Block>& blocks)
 {
-    cout << "세로줄 업데이트" << endl;
     // 각 세로줄 초기화
     for (auto& column : columns) {
         column.clear();
+        
     }
 
-    // 블록을 세로줄에 분류
-    for (const auto& block : blocks) {
-        cout << block.GetX() << endl;
-        int columnIndex = (block.GetX()) / 3; // X 좌표에 따라 세로줄 결정
-        if (columnIndex >= 0 && columnIndex < columns.size()) {
-            columns[columnIndex].push_back(block);
-        }
+    for (auto& column : columns) {
+
+       cout << "column " << column.size() << endl;
+
     }
 }
 
-int InGameManager::CalculateScore(vector<vector<Block>>& columns)
-{
-    cout << "점수 업데이트" << endl;
+int InGameManager::CalculateScore(const vector<vector<Block>>& columns) {
     int score = 0;
 
-    for (auto& column : columns) {
-        // 세로줄에서 3개 연속 같은 색상 찾기
-        for (size_t i = 0; i < column.size(); ) {
-            size_t count = 1;
-            while (i + count < column.size() && column[i].GetColor() == column[i + count].GetColor()) {
-                ++count;
-            }
+    for (const auto& column : columns) {
+        if (column.size() >= 3) { // 세로줄에 블록이 3개 이상인 경우
+            // 최하단 3개의 블록이 같은 색상인지 확인
+            auto color1 = column[column.size() - 1].GetColor();
+            auto color2 = column[column.size() - 2].GetColor();
+            auto color3 = column[column.size() - 3].GetColor();
 
-            if (count == 3) {
-                // 3개 이상의 연속된 블록 제거
-                cout << "점수계산" << endl;
-                score += count;
-                column.erase(column.begin() + i, column.begin() + i + count);
-            }
-            else {
-                ++i;
+            if (color1 == color2 && color2 == color3) {
+                score += 100; // 같은 색상 블록이 3개 이상이면 점수 추가
             }
         }
+        
     }
 
     return score;

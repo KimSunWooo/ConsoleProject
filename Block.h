@@ -8,7 +8,7 @@ using namespace std;
 class Block {
 protected:
     Color color;
-    int x; // X 좌표
+    
     int y; // Y 좌표 (통합 변수)
     int startX;
     vector<vector<int>> blockShape = { {1, 1, 1, 1}, {1, 1, 1, 1} }; // 블럭 모양
@@ -25,8 +25,10 @@ public:
     // 색 설정
     void SetColor(Color newColor);
 
-    // 블록 제거(파괴)
-    int DestroyBlock(int level, std::string color);
+    static void RemoveMatchingBlocks(vector<vector<Block>>& columns, vector<Block>& blocks);
+
+    void ClearBlock() const;
+
 
     // 블록 하단 이동
     void BlockDown(int startY, ColorSelector& selector);

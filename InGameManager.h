@@ -18,7 +18,7 @@ public :
 	void DrawMap();
 
 	void UpdateColumns(vector<vector<Block>>& columns, const std::vector<Block>& blocks);
-	int CalculateScore(vector<vector<Block>>& columns);
+	int CalculateScore(const vector<vector<Block>>& columns);
 private : 
 	
 };

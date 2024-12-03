@@ -8,7 +8,7 @@
 #include "ColorSelector.h"
 using namespace std;
 KeyManager m;
-Block::Block() : color(Color::Red),x(16), y(6), startX(0),  blockShape()
+Block::Block() : color(Color::Red), y(6), startX(0),  blockShape()
 {
 }
 
@@ -28,14 +28,14 @@ void Block::GenerateBlockLine(std::vector<Block>& blocks, vector<Block> height, 
 }
 
 bool Block::operator==(const Block& other) const {
-    return x == other.x && y == other.y && color == other.color;
+    return startX == other.startX && y == other.y && color == other.color;
 }
 
 vector<string> Block::DrawBlock(int level) {
     for (int i = 0; i < blockShape.size(); i++) {
         for (int j = 0; j < blockShape[i].size(); j++) {
             if (blockShape[i][j] == 1) {
-                cout << "\033[" << (y + i) << ";" << (startX + j * 2) << "H";
+                cout << "\033[" << (y + i) << ";" << (startX + j * 2) << "H"; // 수정된 X 좌표 사용
 
                 // 설정된 color에 따라 출력
                 switch (color) {
@@ -59,8 +59,8 @@ vector<string> Block::DrawBlock(int level) {
                 }
             }
         }
-        cout << endl;
     }
+    cout << endl; // 마지막 줄에 개행
     return vector<string>();
 }
 
@@ -76,30 +76,21 @@ void Block::GenerateBlock(int startX, int y) {
 }
 
 void Block::BlockDown(int startY, ColorSelector& selector) {
-    y+=2;
-    // 매번 호출 시 색상 변경
-    Color newColor = selector.GetColor(1); // 새로운 색상 선택
-     
+    y += 2; // 블록을 아래로 이동
 }
 
 std::atomic<bool> isBlockMoving(false);
-void Block::MoveBlocks(std::vector<Block>& blocks, int startY, ColorSelector& selector)
-{
-    if (isBlockMoving.load(std::memory_order_relaxed)) {
-        return; // 이동 중이면 중복 처리 방지
+void Block::MoveBlocks(std::vector<Block>& blocks, int startY, ColorSelector& selector) {
+    if (!isBlockMoving.exchange(true, std::memory_order_relaxed)) {
+        for (auto& block : blocks) {
+            block.BlockDown(startY, selector);
+        }
+        isBlockMoving.store(false, std::memory_order_relaxed);
     }
-
-    isBlockMoving.store(true, std::memory_order_relaxed); // 이동 시작
-
-    for (auto& block : blocks) {
-        block.BlockDown(startY, selector); // 블록 이동
-    }
-
-    isBlockMoving.store(false, std::memory_order_relaxed); // 이동 완료
 }
 
 int Block::GetX() const {
-    return x;
+    return startX;
 }
 
 // Y 좌표 반환
@@ -117,13 +108,60 @@ void Block::SetColor(Color newColor)
     this->color = newColor;
 }
 
-int Block::DestroyBlock(int level, std::string color)
-{
-    // 사라진 것으로 간주
-    color = "none";
-    int score = 1;
+void Block::RemoveMatchingBlocks(vector<vector<Block>>& columns, vector<Block>& blocks) {
+    vector<Block> blocksToRemove;
 
-    return score;
+    // 각 세로줄 검사
+    for (auto& column : columns) {
+        while (column.size() >= 3) {
+            const auto& last = column[column.size() - 1];
+            const auto& secondLast = column[column.size() - 2];
+            const auto& thirdLast = column[column.size() - 3];
+
+            if (last.GetColor() == secondLast.GetColor() && secondLast.GetColor() == thirdLast.GetColor()) {
+                // 제거할 블록을 추적
+                blocksToRemove.push_back(last);
+                blocksToRemove.push_back(secondLast);
+                blocksToRemove.push_back(thirdLast);
+
+                // 세로줄에서 제거
+                column.pop_back();
+                column.pop_back();
+                column.pop_back();
+            }
+            else {
+                break; // 더 이상 조건에 맞지 않으면 중단
+            }
+        }
+    }
+
+    // 제거된 블록 화면에서 지우기
+    for (const auto& block : blocksToRemove) {
+        block.ClearBlock();
+    }
+
+    // `blocks`에서 삭제
+    blocks.erase(
+        remove_if(blocks.begin(), blocks.end(), [&](const Block& block) {
+            return find(blocksToRemove.begin(), blocksToRemove.end(), block) != blocksToRemove.end();
+            }),
+        blocks.end()
+    );
+}
+
+void Block::ClearBlock() const{
+    for (int i = 0; i < blockShape.size(); i++) {
+        for (int j = 0; j < blockShape[i].size(); j++) {
+            if (blockShape[i][j] == 1) {
+                // 커서 이동: 블록 좌표
+                int cursorX = startX + j * 2; // 블록의 기준 X + 내부 칸
+                int cursorY = y + i;    // 블록의 기준 Y + 내부 줄
+
+                cout << "\033[" << cursorY << ";" << cursorX << "H "; // 공백 출력
+            }
+        }
+    }
+    cout << endl;
 }
 
 
